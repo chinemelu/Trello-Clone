@@ -9,7 +9,7 @@ export default {
         {
           description: 'This is my mad description',
           name: 'first task',
-          id: "027c3488e640f",
+          id: uuid(),
           userAssigned: null
         },
         {
