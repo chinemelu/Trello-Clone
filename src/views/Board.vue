@@ -5,7 +5,9 @@
         class="column" 
         v-for="(column, $columnIndex) of board.columns" 
         :key="$columnIndex"
-        @drop="moveTask($event, column.tasks)"
+        draggable
+        @dragstart.self="pickupColumn($event, $columnIndex)"
+        @drop="moveTaskOrColumn($event, column.tasks, $columnIndex)"
         @dragover.prevent
         @dragenter.prevent
       >
@@ -75,6 +77,21 @@ export default {
       e.dataTransfer.dropEffect = 'move';
       e.dataTransfer.setData('task-index', taskIndex);
       e.dataTransfer.setData('from-column-index', fromColumnIndex);
+      e.dataTransfer.setData('type', 'task')
+    },
+    pickupColumn(e, fromColumnIndex) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.setData('from-column-index', fromColumnIndex);
+      e.dataTransfer.setData('type', 'column');
+    },
+    moveTaskOrColumn(e, toTasks, toColumnIndex) {
+      const type = e.dataTransfer.getData('type')
+      if (type === 'task') {
+        this.moveTask(e, toTasks)
+      } else {
+        this.moveColumn(e, toColumnIndex)
+      }
     },
     moveTask(e, toTasks) {
       const fromColumnIndex = e.dataTransfer.getData('from-column-index');
@@ -85,6 +102,13 @@ export default {
         fromTasks,
         toTasks,
         taskIndex
+      })
+    },
+    moveColumn(e, toColumnIndex) {
+      const fromColumnIndex =e.dataTransfer.getData('from-column-index');
+      this.$store.commit('MOVE_COLUMN', {
+        fromColumnIndex,
+        toColumnIndex,
       })
     }
   },
