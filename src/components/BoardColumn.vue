@@ -12,24 +12,16 @@
         {{ column.name }}
       </div>
       <div class="list-reset">
-        <div 
-          class="task" 
+        <ColumnTask
           v-for="(task, $taskIndex) of column.tasks" 
           :key="$taskIndex"
-          draggable
-          @dragstart="pickupTask($event, $taskIndex, columnIndex)"
-          @click="goToTask(task)"
-          @dragover.prevent
-          @dragenter.prevent
-          @drop.stop="moveTaskOrColumn($event, column.tasks, columnIndex, $taskIndex)"
-          >
-          <span class="w-full flex-no-shrink font-bold">{{ task.name }}</span>
-          <p 
-            v-if="task.description"
-            class="w-full flex-no-shrink mt-1 text-sm">
-            {{ task.description }}
-          </p>
-        </div> 
+          :task="task"
+          :column="column"
+          :columnIndex="columnIndex"
+          :taskIndex="$taskIndex"
+          :board="board"   
+        />
+
         <input
           type="text"
           class="block p-2 w-full bg-transparent"
@@ -42,71 +34,69 @@
 </template>
 
 <script>
-  export default {
-    methods: {
-      moveTaskOrColumn(e, toTasks, toColumnIndex, toTaskIndex) {
-        const type = e.dataTransfer.getData('type')
-        if (type === 'task') {
-          // if the user drops the task on a part of the board that has no listener, put the task at the end
-          this.moveTask(e, toTasks, toTaskIndex !== undefined ? toTaskIndex : toTasks.length)
-        } else {
-          this.moveColumn(e, toColumnIndex)
-        }
-      },
-      moveTask(e, toTasks, toTaskIndex) {
-        const fromColumnIndex = e.dataTransfer.getData('from-column-index');
-        const fromTasks = this.board.columns[fromColumnIndex].tasks;
-        const fromTaskIndex = e.dataTransfer.getData('from-task-index');
-
-        this.$store.commit('MOVE_TASK', {
-          fromTasks,
-          fromTaskIndex,
-          toTasks,
-          toTaskIndex
-        })
-      },
-      moveColumn(e, toColumnIndex) {
-        const fromColumnIndex =e.dataTransfer.getData('from-column-index');
-        this.$store.commit('MOVE_COLUMN', {
-          fromColumnIndex,
-          toColumnIndex,
-        })
-      },
-      pickupColumn(e, fromColumnIndex) {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.dropEffect = 'move';
-        e.dataTransfer.setData('from-column-index', fromColumnIndex);
-        e.dataTransfer.setData('type', 'column');
-      }, 
-      pickupTask(e, taskIndex, fromColumnIndex) {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.dropEffect = 'move';
-        e.dataTransfer.setData('from-task-index', taskIndex);
-        e.dataTransfer.setData('from-column-index', fromColumnIndex);
-        e.dataTransfer.setData('type', 'task')
-      },
-      goToTask(task) {
-        this.$router.push({ name: 'task', params: { id: task.id }})
-      },
-      createTask(e, tasks) {
-        this.$store.commit('CREATE_TASK', {
-          tasks,
-          name: e.target.value
-        })
-        e.target.value = '';
-      },
-    },
-    props: {
-      column: {
-        type: Object ,
-        required: true
-      },
-      columnIndex: {
-        type: Number,
-        required: true
+import ColumnTask from '@/components/ColumnTask';
+export default {
+  components: {
+    ColumnTask,
+  },
+  methods: {
+    moveTaskOrColumn(e, toTasks, toColumnIndex, toTaskIndex) {
+      const type = e.dataTransfer.getData('type')
+      if (type === 'task') {
+        // if the user drops the task on a part of the board that has no listener, put the task at the end
+        this.moveTask(e, toTasks, toTaskIndex !== undefined ? toTaskIndex : toTasks.length)
+      } else {
+        this.moveColumn(e, toColumnIndex)
       }
     },
-  }
+    moveTask(e, toTasks, toTaskIndex) {
+      const fromColumnIndex = e.dataTransfer.getData('from-column-index');
+      const fromTasks = this.board.columns[fromColumnIndex].tasks;
+      const fromTaskIndex = e.dataTransfer.getData('from-task-index');
+
+      this.$store.commit('MOVE_TASK', {
+        fromTasks,
+        fromTaskIndex,
+        toTasks,
+        toTaskIndex
+      })
+    },
+    moveColumn(e, toColumnIndex) {
+      const fromColumnIndex =e.dataTransfer.getData('from-column-index');
+      this.$store.commit('MOVE_COLUMN', {
+        fromColumnIndex,
+        toColumnIndex,
+      })
+    },
+    pickupColumn(e, fromColumnIndex) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.setData('from-column-index', fromColumnIndex);
+      e.dataTransfer.setData('type', 'column');
+    }, 
+    createTask(e, tasks) {
+      this.$store.commit('CREATE_TASK', {
+        tasks,
+        name: e.target.value
+      })
+      e.target.value = '';
+    },
+  },
+  props: {
+    column: {
+      type: Object ,
+      required: true
+    },
+    columnIndex: {
+      type: Number,
+      required: true
+    },
+    board: {
+      type: Object,
+      required: true
+    }
+  },
+}
 </script>
 
 <style lang="css" scoped>
