@@ -35,6 +35,7 @@
 
 <script>
 import ColumnTask from '@/components/ColumnTask';
+import movingTasksAndColumnsMixin from '@/mixins/movingTasksAndColumnsMixin';
 export default {
   components: {
     ColumnTask,
