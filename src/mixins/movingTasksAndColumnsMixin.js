@@ -1,4 +1,18 @@
 const movingTasksAndColumnsMixin = {
+  props: {
+    column: {
+      type: Object ,
+      required: true
+    },
+    columnIndex: {
+      type: Number,
+      required: true
+    },
+    board: {
+      type: Object,
+      required: true
+    }
+  },
   methods: {
     moveTaskOrColumn(e, toTasks, toColumnIndex, toTaskIndex) {
       const type = e.dataTransfer.getData('type')
